@@ -9,18 +9,28 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
+import android.os.Handler;
+
+
 
 import com.mbientlab.bletoolbox.scanner.BleScannerFragment;
+import com.mbientlab.metawear.Message;
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
 
 import java.util.UUID;
+
+import java.util.logging.LogRecord;
+
+
 
 public class MainActivity extends AppCompatActivity implements BleScannerFragment.ScannerCommunicationBus, ServiceConnection {
     public static final int REQUEST_START_APP= 1;
 
     private MetaWearBleService.LocalBinder serviceBinder;
     private MetaWearBoard mwBoard;
+    public TextView texts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +38,15 @@ public class MainActivity extends AppCompatActivity implements BleScannerFragmen
         setContentView(R.layout.activity_main);
 
         getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
+        texts=(TextView) findViewById(R.id.acc_text);
     }
+
+    public Handler updateText=new Handler() {
+        @Override
+        public void handleMessage(android.os.Message msg){
+            texts.setText(msg.toString());
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -109,3 +127,4 @@ public class MainActivity extends AppCompatActivity implements BleScannerFragmen
 
     }
 }
+

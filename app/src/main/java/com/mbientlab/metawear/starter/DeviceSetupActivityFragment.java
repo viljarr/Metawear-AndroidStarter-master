@@ -37,6 +37,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -67,6 +68,9 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private MetaWearBoard mwBoard= null;
     private FragmentSettings settings;
     private Accelerometer accModule;
+    private TextView texts;
+    private Handler textHandler;
+    private DataBuffer DB;
 
     public DeviceSetupActivityFragment() {
     }
@@ -75,6 +79,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         Activity owner= getActivity();
         if (!(owner instanceof FragmentSettings)) {
             throw new ClassCastException("Owning activity must implement the FragmentSettings interface");
@@ -82,6 +87,21 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
         settings= (FragmentSettings) owner;
         owner.getApplicationContext().bindService(new Intent(owner, MetaWearBleService.class), this, Context.BIND_AUTO_CREATE);
+
+        DB = new DataBuffer(500);
+
+        textHandler = new Handler(){
+            @Override
+            public void handleMessage(android.os.Message msg) {
+                String message=(String)msg.obj;
+
+                texts.setText(message);
+
+
+
+
+            }
+        };
     }
 
     @Override
@@ -128,31 +148,46 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                     Snackbar.LENGTH_SHORT).show();
         }
     }
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        final TextView texts = (TextView) view.findViewById(R.id.acc_text);
-        view.findViewById(R.id.acc_start).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                accModule.routeData().fromAxes().stream("acc_stream").commit()
-                        .onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
-                            @Override
-                            public void success(RouteManager result) {
-                                result.subscribe("acc_stream", new RouteManager.MessageHandler() {
-                                    @Override
-                                    public void process(Message msg) {
-                                        Log.i("tutorial", msg.getData(CartesianFloat.class).toString());
-                                        //Text doesnt update :(
-                                        texts.addTextChangedListener();
-                                        texts.setText(msg.getData(CartesianFloat.class).toString());
-                                    }
-                                });
+                @Override
+                public void onViewCreated(View view, Bundle savedInstanceState) {
+                    super.onViewCreated(view, savedInstanceState);
+                    texts = (TextView) view.findViewById(R.id.acc_text);
 
-                                accModule.enableAxisSampling();
-                                accModule.start();
-                            }
-                        });
+                    view.findViewById(R.id.acc_start).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            accModule.routeData().fromAxes().stream("acc_stream").commit()
+                                    .onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+                                        @Override
+                                        public void success(RouteManager result) {
+                                            result.subscribe("acc_stream", new RouteManager.MessageHandler() {
+                                                @Override
+                                                public void process(Message msg) {
+                                                    android.os.Message m=textHandler.obtainMessage();
+
+                                                    //texts.setText(msg.getData(CartesianFloat.class).z().toString());
+                                                    Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
+                                                    //Text doesnt update :(
+                                                    //texts.addTextChangedListener();
+
+                                                    z_data[fP] = msg.getData(CartesianFloat.class).z();
+                                                    // FILTERING DONE HERE
+
+
+                                                    if(++fP > z_data.length)
+                                                        fP = 0;
+
+
+                                                    m.obj=z_data;
+                                                    textHandler.sendMessage(m);
+
+                                                }
+                                            });
+
+                                            accModule.enableAxisSampling();
+                                            accModule.start();
+                                        }
+                                    });
             }
         });
         view.findViewById(R.id.acc_stop).setOnClickListener(new View.OnClickListener() {
