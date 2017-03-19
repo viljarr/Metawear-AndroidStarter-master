@@ -7,43 +7,40 @@ package com.mbientlab.metawear.starter;
 public class DataBuffer {
 
     private float[] z_data;
-    private int wP = 0, rP = 0;
+    private int zeroSample = 0;
 
     public DataBuffer(int size){
         z_data = new float[size];
-        wP = 0;
-        rP = 0;
+        zeroSample = 0;
     }
 
-    public void stepW() {
-        if(++wP > z_data.length){
-            wP = 0;
+    private void stepZS() {
+        if(++zeroSample > z_data.length){
+            zeroSample = 0;
         }
-    }
-
-    public void stepR(){
-        if(++rP > z_data.length){
-            rP = 0;
-        }
-    }
-
-    public int len(){
-        if(wP == rP) return 0;
-
-        if(wP > rP) return (wP-rP);
-
-        else
-            return (z_data.length+wP-rP);
     }
 
     public void addData(float d){
-        z_data[wP] = d;
-        stepW();;
+        z_data[zeroSample] = d;
+        stepZS();
     }
 
-    public float[] getAllData(){
+    public float getSampleAt(int index) {
+        if (index > 0)
+            return (z_data[zeroSample]);
+
+        int i = zeroSample + index;
+        if (i < 0)
+            return (z_data[z_data.length + i]);
+        else
+            return (z_data[i]);
+    }
+
+    public float[] getAllData() {
         float[] tmp = new float[z_data.length];
 
-        for(int i = rP++; ; )
+        for (int i = 0; i < z_data.length; i++) {
+            tmp[i] = getSampleAt(-i);
+        }
     }
 }
