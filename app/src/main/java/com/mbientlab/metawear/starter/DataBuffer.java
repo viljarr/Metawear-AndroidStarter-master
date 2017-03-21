@@ -42,5 +42,6 @@ public class DataBuffer {
         for (int i = 0; i < z_data.length; i++) {
             tmp[i] = getSampleAt(-i);
         }
+        return tmp;
     }
 }

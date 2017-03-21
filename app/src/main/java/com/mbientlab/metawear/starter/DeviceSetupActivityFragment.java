@@ -69,12 +69,13 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private FragmentSettings settings;
     private Accelerometer accModule;
     private TextView texts;
-    private Handler textHandler;
+    private Handler dataHandler;
     private DataBuffer DB;
 
     public DeviceSetupActivityFragment() {
     }
 
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +91,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
         DB = new DataBuffer(500);
 
-        textHandler = new Handler(){
+        dataHandler = new Handler(){
             @Override
             public void handleMessage(android.os.Message msg) {
                 String message=(String)msg.obj;
@@ -163,23 +164,26 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                             result.subscribe("acc_stream", new RouteManager.MessageHandler() {
                                                 @Override
                                                 public void process(Message msg) {
-                                                    android.os.Message m=textHandler.obtainMessage();
+                                                    android.os.Message m=dataHandler.obtainMessage();
 
                                                     //texts.setText(msg.getData(CartesianFloat.class).z().toString());
                                                     Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
 
-                                                    z_data[fP] = msg.getData(CartesianFloat.class).z();
+                                                    DB.addData( msg.getData(CartesianFloat.class).z());
                                                     // FILTERING DONE HERE
 
-
+                                                    /*
                                                     if(++fP > z_data.length)
                                                         fP = 0;
 
 
                                                     m.obj=z_data;
-                                                    textHandler.sendMessage(m);
+                                                    */
+
+                                                    m.obj=DB;
+                                                    dataHandler.sendMessage(m);
 
                                                 }
                                             });
