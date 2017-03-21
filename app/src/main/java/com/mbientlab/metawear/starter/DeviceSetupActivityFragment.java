@@ -195,7 +195,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
 
-                                                    DB.addData(msg.getData(CartesianFloat.class).z());
+                                                    DB.addData(msg.getData(CartesianFloat.class).z()*100);
                                                     // FILTERING DONE HERE
 
                                                     /*

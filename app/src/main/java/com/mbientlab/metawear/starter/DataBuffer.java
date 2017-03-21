@@ -15,7 +15,7 @@ public class DataBuffer {
     }
 
     private void stepZS() {
-        if(++zeroSample > z_data.length){
+        if(++zeroSample >= z_data.length){
             zeroSample = 0;
         }
     }
