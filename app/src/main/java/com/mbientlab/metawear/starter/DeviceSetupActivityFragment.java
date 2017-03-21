@@ -82,6 +82,9 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private Canvas canvas;
     public Paint paint, p;
 
+    private Filter LpFilter;
+    private Filter HpFilter;
+
     public DeviceSetupActivityFragment() {
     }
 
@@ -113,6 +116,8 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
         p.setStrokeWidth(5.0f);
         p.setStyle(Paint.Style.STROKE);
 
+        LpFilter = new Filter(-1.1430f, -0.4128f, 0.6389f, 1.2779f, 0.6389f);
+        HpFilter = new Filter(1.9556f, -0.9565f, 0.9780f, -1.9561f, 0.9780f);
 
         dataHandler = new Handler(){
             @Override
@@ -195,7 +200,9 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
 
-                                                    DB.addData(msg.getData(CartesianFloat.class).z()*100);
+                                                    float sample = LpFilter.filt(HpFilter.filt(msg.getData(CartesianFloat.class).z()*1000));
+
+                                                    DB.addData(sample);
                                                     // FILTERING DONE HERE
 
                                                     /*
