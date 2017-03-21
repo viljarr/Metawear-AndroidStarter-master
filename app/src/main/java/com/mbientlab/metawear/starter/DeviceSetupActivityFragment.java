@@ -37,6 +37,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
@@ -46,6 +50,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mbientlab.metawear.AsyncOperation;
@@ -69,8 +74,13 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private FragmentSettings settings;
     private Accelerometer accModule;
     private TextView texts;
+    private ImageView graph;
     private Handler dataHandler;
     private DataBuffer DB;
+
+    private Bitmap bmp;
+    private Canvas canvas;
+    public Paint paint, p;
 
     public DeviceSetupActivityFragment() {
     }
@@ -91,16 +101,29 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
         DB = new DataBuffer(500);
 
+        // set paint for graph
+        paint = new Paint();
+        paint.setColor(Color.rgb(3, 217, 15));
+        paint.setStrokeWidth(1.0f);
+        paint.setStyle(Paint.Style.STROKE);
+
+        // set paint for grid
+        p = new Paint();
+        p.setColor(Color.rgb(2, 72, 14));
+        p.setStrokeWidth(5.0f);
+        p.setStyle(Paint.Style.STROKE);
+
+
         dataHandler = new Handler(){
             @Override
             public void handleMessage(android.os.Message msg) {
-                String message=(String)msg.obj;
+               //String message=(String)msg.obj;
 
-                texts.setText(message);
+                //texts.setText(message);
 
-
-
-
+                graph.setMinimumWidth(graph.getWidth());
+                graph.setMinimumHeight(graph.getHeight());
+                graph.setImageBitmap(bmp);
             }
         };
     }
@@ -153,6 +176,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                 public void onViewCreated(View view, Bundle savedInstanceState) {
                     super.onViewCreated(view, savedInstanceState);
                     texts = (TextView) view.findViewById(R.id.acc_text);
+                    graph = (ImageView) view.findViewById(R.id.imgGraph);
 
                     view.findViewById(R.id.acc_start).setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -164,14 +188,14 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                             result.subscribe("acc_stream", new RouteManager.MessageHandler() {
                                                 @Override
                                                 public void process(Message msg) {
-                                                    android.os.Message m=dataHandler.obtainMessage();
+                                                    android.os.Message m = dataHandler.obtainMessage();
 
                                                     //texts.setText(msg.getData(CartesianFloat.class).z().toString());
                                                     Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
 
-                                                    DB.addData( msg.getData(CartesianFloat.class).z());
+                                                    DB.addData(msg.getData(CartesianFloat.class).z());
                                                     // FILTERING DONE HERE
 
                                                     /*
@@ -182,8 +206,27 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     m.obj=z_data;
                                                     */
 
-                                                    m.obj=DB;
-                                                    dataHandler.sendMessage(m);
+                                                    // Bitmap
+                                                    bmp = Bitmap.createBitmap(1000, 600, Bitmap.Config.ARGB_8888);
+                                                    int dpi = getResources().getDisplayMetrics().densityDpi;
+                                                    bmp.setDensity(dpi);
+
+
+                                                    // Canvas
+                                                    canvas = new Canvas(bmp);
+                                                    canvas.drawRGB(0, 51, 0);
+                                                    canvas.drawRect(3, 3, bmp.getWidth() - 3, bmp.getHeight() - 3, p);
+                                                    //canvas.drawCircle(x, bmp.getHeight() / 2, radius, paint);
+
+                                                    float[] z_data = DB.getAllData();
+
+                                                    for (int i = 0; (i + 1) < z_data.length; i++) {
+                                                        canvas.drawLine(i * 2, (float) (300 + z_data[i]), (i + 1) * 2, (float) (300 + z_data[i + 1]), paint);
+                                                    }
+
+
+                                                    //m.obj = bmp;
+                                                    dataHandler.sendEmptyMessage(0);
 
                                                 }
                                             });
@@ -192,16 +235,16 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                             accModule.start();
                                         }
                                     });
-            }
-        });
-        view.findViewById(R.id.acc_stop).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                accModule.stop();
-                accModule.disableAxisSampling();
-                mwBoard.removeRoutes();
-            }
-        });
-    }
+                        }
+                    });
+                    view.findViewById(R.id.acc_stop).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            accModule.stop();
+                            accModule.disableAxisSampling();
+                            mwBoard.removeRoutes();
+                        }
+                    });
+                }
 
 }
