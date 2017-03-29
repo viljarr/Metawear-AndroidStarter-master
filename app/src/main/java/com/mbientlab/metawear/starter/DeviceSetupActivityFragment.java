@@ -85,6 +85,8 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private Filter LpFilter;
     private Filter HpFilter;
 
+    private int drawFreq;
+
     public DeviceSetupActivityFragment() {
     }
 
@@ -103,7 +105,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
         owner.getApplicationContext().bindService(new Intent(owner, MetaWearBleService.class), this, Context.BIND_AUTO_CREATE);
 
         DB = new DataBuffer(500);
-
+        drawFreq=0;
         // set paint for graph
         paint = new Paint();
         paint.setColor(Color.rgb(3, 217, 15));
@@ -171,7 +173,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
         try {
             accModule = mwBoard.getModule(Accelerometer.class);
             // Set the output data rate to 25Hz or closet valid value
-            accModule.setOutputDataRate(25.f);
+            accModule.setOutputDataRate(100.f);
         } catch (UnsupportedModuleException e) {
             Snackbar.make(getActivity().findViewById(R.id.device_setup_fragment), e.getMessage(),
                     Snackbar.LENGTH_SHORT).show();
@@ -200,7 +202,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
 
-                                                    float sample = LpFilter.filt(HpFilter.filt(msg.getData(CartesianFloat.class).z()*1000));
+                                                    float sample = LpFilter.filt(HpFilter.filt((msg.getData(CartesianFloat.class).z())*10000));
 
                                                     DB.addData(sample);
                                                     // FILTERING DONE HERE
@@ -213,27 +215,33 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     m.obj=z_data;
                                                     */
 
-                                                    // Bitmap
-                                                    bmp = Bitmap.createBitmap(1000, 600, Bitmap.Config.ARGB_8888);
-                                                    int dpi = getResources().getDisplayMetrics().densityDpi;
-                                                    bmp.setDensity(dpi);
+                                                    if (drawFreq>=4){
+                                                        // Bitmap
+                                                        bmp = Bitmap.createBitmap(1000, 600, Bitmap.Config.ARGB_8888);
+                                                        int dpi = getResources().getDisplayMetrics().densityDpi;
+                                                        bmp.setDensity(dpi);
 
 
-                                                    // Canvas
-                                                    canvas = new Canvas(bmp);
-                                                    canvas.drawRGB(0, 51, 0);
-                                                    canvas.drawRect(3, 3, bmp.getWidth() - 3, bmp.getHeight() - 3, p);
-                                                    //canvas.drawCircle(x, bmp.getHeight() / 2, radius, paint);
+                                                        // Canvas
+                                                        canvas = new Canvas(bmp);
+                                                        canvas.drawRGB(0, 51, 0);
+                                                        canvas.drawRect(3, 3, bmp.getWidth() - 3, bmp.getHeight() - 3, p);
+                                                        //canvas.drawCircle(x, bmp.getHeight() / 2, radius, paint);
 
-                                                    float[] z_data = DB.getAllData();
+                                                        float[] z_data = DB.getAllData();
 
-                                                    for (int i = 0; (i + 1) < z_data.length; i++) {
-                                                        canvas.drawLine(i * 2, (float) (300 + z_data[i]), (i + 1) * 2, (float) (300 + z_data[i + 1]), paint);
+                                                        for (int i = 0; (i + 1) < z_data.length; i++) {
+                                                            canvas.drawLine(i * 2, (float) (300 + z_data[i]), (i + 1) * 2, (float) (300 + z_data[i + 1]), paint);
+                                                        }
+
+
+                                                        //m.obj = bmp;
+                                                        dataHandler.sendEmptyMessage(0);
+                                                        drawFreq=0;
+                                                    }else{
+                                                        ++drawFreq;
                                                     }
 
-
-                                                    //m.obj = bmp;
-                                                    dataHandler.sendEmptyMessage(0);
 
                                                 }
                                             });
