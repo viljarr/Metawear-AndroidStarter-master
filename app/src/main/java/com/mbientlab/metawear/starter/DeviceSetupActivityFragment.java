@@ -84,7 +84,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
     private Filter LpFilter;
     private Filter HpFilter;
-
+    private int len;
     private int drawFreq;
 
     public DeviceSetupActivityFragment() {
@@ -104,12 +104,15 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
         settings= (FragmentSettings) owner;
         owner.getApplicationContext().bindService(new Intent(owner, MetaWearBleService.class), this, Context.BIND_AUTO_CREATE);
 
+
+        len=0;
+
         DB = new DataBuffer(500);
         drawFreq=0;
         // set paint for graph
         paint = new Paint();
-        paint.setColor(Color.rgb(3, 217, 15));
-        paint.setStrokeWidth(1.0f);
+        paint.setColor(Color.rgb(0,0,0));
+        paint.setStrokeWidth(3.0f);
         paint.setStyle(Paint.Style.STROKE);
 
         // set paint for grid
@@ -120,6 +123,25 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
         LpFilter = new Filter(-1.1430f, -0.4128f, 0.6389f, 1.2779f, 0.6389f);
         HpFilter = new Filter(1.9556f, -0.9565f, 0.9780f, -1.9561f, 0.9780f);
+
+
+
+        //Init bitmap
+        bmp = Bitmap.createBitmap(1000, 600, Bitmap.Config.ARGB_8888);
+        int dpi = getResources().getDisplayMetrics().densityDpi;
+        bmp.setDensity(dpi);
+
+
+        // Canvas
+        canvas = new Canvas(bmp);
+        canvas.drawColor(getResources().getColor(R.color.bg));
+
+
+
+
+        canvas.drawLine(0, 300, 1000,300, paint);
+
+
 
         dataHandler = new Handler(){
             @Override
@@ -184,7 +206,8 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                     super.onViewCreated(view, savedInstanceState);
                     texts = (TextView) view.findViewById(R.id.acc_text);
                     graph = (ImageView) view.findViewById(R.id.imgGraph);
-
+                    graph.setImageBitmap(bmp);
+                    
                     view.findViewById(R.id.acc_start).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -201,10 +224,35 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
+                                                    float preSample=msg.getData(CartesianFloat.class).z()*10000;
+                                                    Log.i("tutorial presample",Float.toString(preSample));
+                                                    float[] z_data = DB.getAllData();
+                                                    /*
+                                                    if(len>500){
 
-                                                    float sample = LpFilter.filt(HpFilter.filt((msg.getData(CartesianFloat.class).z())*10000));
+                                                        float sum;
+                                                        sum=0;
+                                                        for(int i=0;(i + 1) < z_data.length; i++){
+                                                            sum += z_data[i];
+                                                        }
+                                                        Log.i("tutorial length",Float.toString(z_data.length));
+                                                        Log.i("tutorial sum",Float.toString(sum));
+                                                        float mean= sum/z_data.length;
+                                                        Log.i("tutorial mean",Float.toString(mean));
 
-                                                    DB.addData(sample);
+                                                        preSample=preSample-mean;
+                                                        if (preSample>0.05 || preSample<-0.5){
+                                                            preSample=0f;
+                                                        }
+                                                    }else{
+                                                        ++len;
+                                                    }
+                                                    */
+
+                                                    float sample = LpFilter.filt(HpFilter.filt((preSample)));
+                                                    Log.i("tutorial sample",Float.toString(sample));
+                                                    DB.addData(preSample);
+
                                                     // FILTERING DONE HERE
 
                                                     /*
@@ -224,12 +272,20 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
                                                         // Canvas
                                                         canvas = new Canvas(bmp);
-                                                        canvas.drawRGB(0, 51, 0);
-                                                        canvas.drawRect(3, 3, bmp.getWidth() - 3, bmp.getHeight() - 3, p);
+                                                        canvas.drawColor(getResources().getColor(R.color.bg));
+
                                                         //canvas.drawCircle(x, bmp.getHeight() / 2, radius, paint);
 
+                                                        /*
                                                         float[] z_data = DB.getAllData();
+                                                        float sum;
+                                                        sum=0;
+                                                        for(int i=0;(i + 1) < z_data.length; i++){
+                                                            sum += z_data[i];
+                                                        }
+                                                        */
 
+                                                        //float mean= sum/z_data.length;
                                                         for (int i = 0; (i + 1) < z_data.length; i++) {
                                                             canvas.drawLine(i * 2, (float) (300 + z_data[i]), (i + 1) * 2, (float) (300 + z_data[i + 1]), paint);
                                                         }

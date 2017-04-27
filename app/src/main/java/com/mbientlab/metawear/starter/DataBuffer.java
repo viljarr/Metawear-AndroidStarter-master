@@ -27,9 +27,9 @@ public class DataBuffer {
 
     public float getSampleAt(int index) {
         if (index > 0)
-            return (z_data[zeroSample]);
+            return (z_data[zeroSample-1]);
 
-        int i = zeroSample + index;
+        int i = zeroSample-1 + index;
         if (i < 0)
             return (z_data[z_data.length + i]);
         else
@@ -40,7 +40,7 @@ public class DataBuffer {
         float[] tmp = new float[z_data.length];
 
         for (int i = 0; i < z_data.length; i++) {
-            tmp[i] = getSampleAt(-i);
+            tmp[i] = getSampleAt(-1*i);
         }
         return tmp;
     }
