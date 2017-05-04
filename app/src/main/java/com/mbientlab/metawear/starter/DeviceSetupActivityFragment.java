@@ -82,7 +82,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private Canvas canvas;
     public Paint paint, p;
 
-    private Filter LpFilter;
+    //private Filter LpFilter;
     private Filter HpFilter;
     private int len;
     private int drawFreq;
@@ -121,8 +121,8 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
         p.setStrokeWidth(5.0f);
         p.setStyle(Paint.Style.STROKE);
 
-        LpFilter = new Filter(-1.1430f, -0.4128f, 0.6389f, 1.2779f, 0.6389f);
-        HpFilter = new Filter(1.9556f, -0.9565f, 0.9780f, -1.9561f, 0.9780f);
+        //LpFilter = new Filter(-1.1430f, -0.4128f, 0.6389f, 1.2779f, 0.6389f);
+        HpFilter = new Filter(-0.369527f, 0.195816f, 0.391335f, -0.78267f, 0.391335f);
 
 
 
@@ -207,7 +207,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                     texts = (TextView) view.findViewById(R.id.acc_text);
                     graph = (ImageView) view.findViewById(R.id.imgGraph);
                     graph.setImageBitmap(bmp);
-                    
+
                     view.findViewById(R.id.acc_start).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -249,9 +249,9 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     }
                                                     */
 
-                                                    float sample = LpFilter.filt(HpFilter.filt((preSample)));
+                                                    float sample = HpFilter.filt(preSample);
                                                     Log.i("tutorial sample",Float.toString(sample));
-                                                    DB.addData(preSample);
+                                                    DB.addData(sample);
 
                                                     // FILTERING DONE HERE
 

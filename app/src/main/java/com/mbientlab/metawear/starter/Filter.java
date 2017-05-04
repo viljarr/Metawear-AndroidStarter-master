@@ -20,7 +20,7 @@ public class Filter {
 
     public float filt(float sample){
         x_0 = sample;
-        y_0 = b0*x_0 + b1*x_1 + b2*x_2 + a1*y_1 + a2*y_2;
+        y_0 = b0*x_0 + b1*x_1 + b2*x_2 - a1*y_1 - a2*y_2;
 
         y_2 = y_1;
         y_1 = y_0;
