@@ -74,6 +74,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
     private FragmentSettings settings;
     private Accelerometer accModule;
     private TextView texts;
+    private TextView bpmText, bpmMaxText, bpmMinText;
     private ImageView graph;
     private Handler dataHandler;
     private DataBuffer DB;
@@ -84,6 +85,10 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
     //private Filter LpFilter;
     private Filter HpFilter;
+    private BPM myBPM;
+
+    private int bpmVal = 0;
+
     private int len;
     private int drawFreq;
 
@@ -123,7 +128,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
         //LpFilter = new Filter(-1.1430f, -0.4128f, 0.6389f, 1.2779f, 0.6389f);
         HpFilter = new Filter(-0.369527f, 0.195816f, 0.391335f, -0.78267f, 0.391335f);
-
+        myBPM = new BPM(0.45f, 33, 11);
 
 
         //Init bitmap
@@ -148,7 +153,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
             public void handleMessage(android.os.Message msg) {
                //String message=(String)msg.obj;
 
-                //texts.setText(message);
+                bpmText.setText(bpmVal);
 
                 graph.setMinimumWidth(graph.getWidth());
                 graph.setMinimumHeight(graph.getHeight());
@@ -205,6 +210,9 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                 public void onViewCreated(View view, Bundle savedInstanceState) {
                     super.onViewCreated(view, savedInstanceState);
                     texts = (TextView) view.findViewById(R.id.acc_text);
+                    bpmText = (TextView) view.findViewById(R.id.textView2);
+                    bpmMinText = (TextView) view.findViewById(R.id.textView5);
+                    bpmMaxText = (TextView) view.findViewById(R.id.textView7);
                     graph = (ImageView) view.findViewById(R.id.imgGraph);
                     graph.setImageBitmap(bmp);
 
@@ -253,6 +261,10 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     Log.i("tutorial sample",Float.toString(sample));
                                                     DB.addData(sample);
 
+                                                    int temp = myBPM.GetBpm(sample);
+                                                    if(temp != -1) {
+                                                        bpmVal = temp;
+                                                    }
                                                     // FILTERING DONE HERE
 
                                                     /*
