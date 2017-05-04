@@ -128,7 +128,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
         //LpFilter = new Filter(-1.1430f, -0.4128f, 0.6389f, 1.2779f, 0.6389f);
         HpFilter = new Filter(-0.369527f, 0.195816f, 0.391335f, -0.78267f, 0.391335f);
-        myBPM = new BPM(0.45f, 33, 11);
+        myBPM = new BPM(0.00016f, 50, 11);
 
 
         //Init bitmap
@@ -153,8 +153,10 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
             public void handleMessage(android.os.Message msg) {
                //String message=(String)msg.obj;
 
-                bpmText.setText(bpmVal);
-
+                bpmText.setText(""+bpmVal);
+                bpmMinText.setText(""+myBPM.GetMinBpm());
+                bpmMaxText.setText(""+myBPM.GetMaxBpm());
+                Log.i("tutorial test", ""+bpmVal);
                 graph.setMinimumWidth(graph.getWidth());
                 graph.setMinimumHeight(graph.getHeight());
                 graph.setImageBitmap(bmp);
@@ -229,11 +231,11 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     android.os.Message m = dataHandler.obtainMessage();
 
                                                     //texts.setText(msg.getData(CartesianFloat.class).z().toString());
-                                                    Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
+                                                    //Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
                                                     //Text doesnt update :(
                                                     //texts.addTextChangedListener();
-                                                    float preSample=msg.getData(CartesianFloat.class).z()*10000;
-                                                    Log.i("tutorial presample",Float.toString(preSample));
+                                                    float preSample=msg.getData(CartesianFloat.class).z();
+                                                    //Log.i("tutorial presample",Float.toString(preSample));
                                                     float[] z_data = DB.getAllData();
                                                     /*
                                                     if(len>500){
@@ -259,7 +261,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
                                                     float sample = HpFilter.filt(preSample);
                                                     Log.i("tutorial sample",Float.toString(sample));
-                                                    DB.addData(sample);
+                                                    DB.addData(sample*10000);
 
                                                     int temp = myBPM.GetBpm(sample);
                                                     if(temp != -1) {
