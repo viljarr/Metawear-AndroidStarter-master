@@ -66,6 +66,11 @@ public class BPM {
         return Bpm;
     }
 
+    public void clear(){
+        minBpm=0;
+        maxBpm=0;
+    }
+
     public int GetMinBpm(){
         return minBpm;
     }

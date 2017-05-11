@@ -91,6 +91,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
 
     private int len;
     private int drawFreq;
+    private ImageView image_start,image_stop;
 
     public DeviceSetupActivityFragment() {
     }
@@ -217,10 +218,14 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                     bpmMaxText = (TextView) view.findViewById(R.id.textView7);
                     graph = (ImageView) view.findViewById(R.id.imgGraph);
                     graph.setImageBitmap(bmp);
+                    image_start=(ImageView) view.findViewById(R.id.acc_start);
+                    image_stop=(ImageView) view.findViewById(R.id.acc_stop);
 
                     view.findViewById(R.id.acc_start).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            image_stop.setImageResource(R.drawable.ic_action_stop_enabled);
+                            image_start.setImageResource(R.drawable.ic_action_start_disabled);
                             accModule.routeData().fromAxes().stream("acc_stream").commit()
                                     .onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
                                         @Override
@@ -325,9 +330,17 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                     view.findViewById(R.id.acc_stop).setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            image_stop.setImageResource(R.drawable.ic_action_stop_disabled);
+                            image_start.setImageResource(R.drawable.ic_action_start_enabled);
                             accModule.stop();
                             accModule.disableAxisSampling();
                             mwBoard.removeRoutes();
+                        }
+                    });
+                    view.findViewById(R.id.refresh).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            myBPM.clear();
                         }
                     });
                 }
