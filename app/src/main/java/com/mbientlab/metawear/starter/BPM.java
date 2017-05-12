@@ -52,6 +52,11 @@ public class BPM {
                 if(kasvaa>buffSize) {
                     Bpm = (buffSize - 1) * 6000 / ((int) (Buff.getSampleAt(0) - Buff.getSampleAt(-buffSize + 1)));
                 }
+
+                if((Buff.getSampleAt(0) - Buff.getSampleAt(-buffSize + 1))>(20*100)){
+                    Bpm=0;
+                }
+
                 if(Bpm>maxBpm){
                     maxBpm=Bpm;
                 }else if((Bpm<minBpm || minBpm==0)&& Bpm>40){
