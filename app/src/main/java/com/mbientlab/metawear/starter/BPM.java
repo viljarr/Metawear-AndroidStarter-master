@@ -33,8 +33,8 @@ public class BPM {
     public int GetBpm (float z) {
         Bpm = -1;
         n++;
-        z=z*z;
-        Log.i("tutorial BPM sample", ""+z);
+        z = z * z;
+        Log.i("tutorial BPM sample", "" + z);
         if (counter > 0) {
             if ((z > maxim) && (z > thr)) {
                 maxim = z;
@@ -45,22 +45,18 @@ public class BPM {
             } else {
                 counter--;
             }
-        }
-        else{
-            if(maxim>0){
-                Buff.addData((float)index);
-                if(kasvaa>buffSize) {
+        } else {
+            if (maxim > 0) {
+                Buff.addData((float) index);
+                if (kasvaa > buffSize) {
                     Bpm = (buffSize - 1) * 6000 / ((int) (Buff.getSampleAt(0) - Buff.getSampleAt(-buffSize + 1)));
                 }
 
-                if((Buff.getSampleAt(0) - Buff.getSampleAt(-buffSize + 1))>(20*100)){
-                    Bpm=0;
-                }
 
-                if(Bpm>maxBpm){
-                    maxBpm=Bpm;
-                }else if((Bpm<minBpm || minBpm==0)&& Bpm>40){
-                    minBpm=Bpm;
+                if (Bpm > maxBpm) {
+                    maxBpm = Bpm;
+                } else if ((Bpm < minBpm || minBpm == 0) && Bpm > 40) {
+                    minBpm = Bpm;
                 }
 
             }
@@ -68,6 +64,12 @@ public class BPM {
             maxim = 0;
             counter = win;
         }
+        if (kasvaa > buffSize) {
+            if ((n - Buff.getSampleAt(-buffSize + 1)) > (20 * 100)) {
+                Bpm = 0;
+            }
+        }
+
         return Bpm;
     }
 
