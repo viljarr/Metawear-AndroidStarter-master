@@ -152,7 +152,6 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
         dataHandler = new Handler(){
             @Override
             public void handleMessage(android.os.Message msg) {
-               //String message=(String)msg.obj;
 
                 bpmText.setText(""+bpmVal);
                 bpmMinText.setText(""+myBPM.GetMinBpm());
@@ -235,34 +234,10 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                 public void process(Message msg) {
                                                     android.os.Message m = dataHandler.obtainMessage();
 
-                                                    //texts.setText(msg.getData(CartesianFloat.class).z().toString());
-                                                    //Log.i("tutorial test", msg.getData(CartesianFloat.class).toString());
-                                                    //Text doesnt update :(
-                                                    //texts.addTextChangedListener();
                                                     float preSample=msg.getData(CartesianFloat.class).z();
-                                                    //Log.i("tutorial presample",Float.toString(preSample));
+
                                                     float[] z_data = DB.getAllData();
-                                                    /*
-                                                    if(len>500){
 
-                                                        float sum;
-                                                        sum=0;
-                                                        for(int i=0;(i + 1) < z_data.length; i++){
-                                                            sum += z_data[i];
-                                                        }
-                                                        Log.i("tutorial length",Float.toString(z_data.length));
-                                                        Log.i("tutorial sum",Float.toString(sum));
-                                                        float mean= sum/z_data.length;
-                                                        Log.i("tutorial mean",Float.toString(mean));
-
-                                                        preSample=preSample-mean;
-                                                        if (preSample>0.05 || preSample<-0.5){
-                                                            preSample=0f;
-                                                        }
-                                                    }else{
-                                                        ++len;
-                                                    }
-                                                    */
 
                                                     float sample = HpFilter.filt(preSample);
                                                     Log.i("tutorial sample",Float.toString(sample));
@@ -272,15 +247,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                     if(temp != -1) {
                                                         bpmVal = temp;
                                                     }
-                                                    // FILTERING DONE HERE
 
-                                                    /*
-                                                    if(++fP > z_data.length)
-                                                        fP = 0;
-
-
-                                                    m.obj=z_data;
-                                                    */
 
                                                     if (drawFreq>=4){
                                                         // Bitmap
@@ -293,16 +260,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                         canvas = new Canvas(bmp);
                                                         canvas.drawColor(getResources().getColor(R.color.bg));
 
-                                                        //canvas.drawCircle(x, bmp.getHeight() / 2, radius, paint);
 
-                                                        /*
-                                                        float[] z_data = DB.getAllData();
-                                                        float sum;
-                                                        sum=0;
-                                                        for(int i=0;(i + 1) < z_data.length; i++){
-                                                            sum += z_data[i];
-                                                        }
-                                                        */
 
                                                         //float mean= sum/z_data.length;
                                                         for (int i = 0; (i + 1) < z_data.length; i++) {
@@ -310,7 +268,7 @@ public class DeviceSetupActivityFragment extends Fragment implements ServiceConn
                                                         }
 
 
-                                                        //m.obj = bmp;
+
                                                         dataHandler.sendEmptyMessage(0);
                                                         drawFreq=0;
                                                     }else{

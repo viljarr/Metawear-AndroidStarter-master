@@ -14,7 +14,7 @@ public class BPM {
     int Bpm = -1;
     int buffSize;
     int n = -1;
-    int kasvaa=0;
+    int limit =0;
     int maxBpm=0;
     int minBpm=0;
 
@@ -40,7 +40,7 @@ public class BPM {
                 maxim = z;
                 index = n;
                 counter = win;
-                kasvaa++;
+                limit++;
 
             } else {
                 counter--;
@@ -48,7 +48,7 @@ public class BPM {
         } else {
             if (maxim > 0) {
                 Buff.addData((float) index);
-                if (kasvaa > buffSize) {
+                if (limit > buffSize) {
                     Bpm = (buffSize - 1) * 6000 / ((int) (Buff.getSampleAt(0) - Buff.getSampleAt(-buffSize + 1)));
                 }
 
@@ -64,7 +64,7 @@ public class BPM {
             maxim = 0;
             counter = win;
         }
-        if (kasvaa > buffSize) {
+        if (limit > buffSize) {
             if ((n - Buff.getSampleAt(-buffSize + 1)) > (20 * 100)) {
                 Bpm = 0;
             }
